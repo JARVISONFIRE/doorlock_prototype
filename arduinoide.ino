@@ -7,15 +7,19 @@
 
 // Length of password + 1 for null character
 #define Password_Length 9
-#define VCC 13
+
 // Character to hold password input
 char Data[Password_Length];
+
 // Password
 char Master[Password_Length] = "12345678";
 
 // Pin connected to lock relay input
 int lockOutput = 11;
 
+// counter for incorrect attempts, max att
+int countinc = 0;
+#define MAXINC 3
 
 // Counter for character entries
 byte data_count = 0;
@@ -52,8 +56,6 @@ void setup() {
 
   // Set lockOutput as an OUTPUT pin
   pinMode(lockOutput, OUTPUT);
-  pinMode(VCC, OUTPUT);
-  digitalWrite(VCC,HIGH);
 }
 
 void loop() {
@@ -71,6 +73,11 @@ void loop() {
       showPass();
       goto shown;
     }
+
+    // if #, backspace
+    // if (customKey == '#') {
+    //   goto shown;
+    // }
 
 
     // Enter keypress into array and increment counter
@@ -98,6 +105,18 @@ void loop() {
       // Password is incorrect
       lcd.print("Incorrect");
       delay(1000);
+      countinc++;
+      if (countinc == MAXINC) {
+        lcd.clear();
+        lcd.print("Too many in-");
+        lcd.setCursor(0, 1);
+        lcd.print("correct attempts.");
+        delay(2000);
+        lcd.clear();
+        lcd.print("Try again later");
+        delay(7000);
+        countinc = 0;
+      }
     }
 
     // Clear data and LCD display
