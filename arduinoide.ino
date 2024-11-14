@@ -75,9 +75,10 @@ void loop() {
     }
 
     // if #, backspace
-    // if (customKey == '#') {
-    //   goto shown;
-    // }
+    if (customKey == '#') {
+      backspace();
+      goto shown;
+    }
 
 
     // Enter keypress into array and increment counter
@@ -145,7 +146,9 @@ void showPass() {
   lcd.print("Check Password:");
   lcd.setCursor(0, 1);
   // print every char in password
-  lcd.print(Data);
+  for (int i = 0; i < data_count; i++) {
+    lcd.print(Data[i]);
+  }
   // wait for one second
   delay(1500);
   // clear screen, set cursor to start
@@ -155,6 +158,16 @@ void showPass() {
   lcd.setCursor(0, 1);
   // print stars
   for (int i = 0; i < data_count; i++) {
+    lcd.print('*');
+  }
+}
+
+void backspace() {
+  data_count--;
+  lcd.clear();
+  lcd.print("Enter Password:");
+  lcd.setCursor(0, 1);
+  for (int i = 0; i < data_count;  i++) {
     lcd.print('*');
   }
 }
