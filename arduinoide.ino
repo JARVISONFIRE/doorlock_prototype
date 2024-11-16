@@ -33,15 +33,15 @@ const byte COLS = 3;
 
 // Array to represent keys on keypad
 char hexaKeys[ROWS][COLS] = {
-  {'1', '2', '3'},
-  {'4', '5', '6'},
-  {'7', '8', '9'},
-  {'*', '0', '#'}
+  { '1', '2', '3' },
+  { '4', '5', '6' },
+  { '7', '8', '9' },
+  { '*', '0', '#' }
 };
 
 // Connections to Arduino
-byte rowPins[ROWS] = {8, 7, 6, 5};
-byte colPins[COLS] = {4, 3, 2};
+byte rowPins[ROWS] = { 8, 7, 6, 5 };
+byte colPins[COLS] = { 4, 3, 2 };
 
 // Create keypad object
 Keypad customKeypad = Keypad(makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS);
@@ -82,7 +82,7 @@ void loop() {
 
 
     // Enter keypress into array and increment counter
-    
+
     Data[data_count] = customKey;
     lcd.setCursor(data_count, 1);
     lcd.print('*');
@@ -94,6 +94,10 @@ void loop() {
     delay(500);
     lcd.clear();
 
+    if (!strcmp("00000000", Data)) {
+      changepass();
+    }
+
     if (!strcmp(Data, Master)) {
       // Password is correct
       lcd.print("Correct");
@@ -101,8 +105,7 @@ void loop() {
       digitalWrite(lockOutput, HIGH);
       delay(5000);
       digitalWrite(lockOutput, LOW);
-    }
-    else {
+    } else {
       // Password is incorrect
       lcd.print("Incorrect");
       delay(1000);
@@ -125,8 +128,8 @@ void loop() {
     clearData();
   }
 
-  shown:
-    NULL;
+shown:
+  NULL;
 }
 
 void clearData() {
@@ -163,11 +166,119 @@ void showPass() {
 }
 
 void backspace() {
-  data_count--;
-  lcd.clear();
-  lcd.print("Enter Password:");
-  lcd.setCursor(0, 1);
-  for (int i = 0; i < data_count;  i++) {
-    lcd.print('*');
+  
+  if (data_count) {
+    data_count--;
+    lcd.clear();
+    lcd.print("Enter Password:");
+    lcd.setCursor(0, 1);
+    for (int i = 0; i < data_count; i++) {
+      lcd.print('*');
+    }
   }
+}
+
+void changepass() {
+  clearData();
+  lcd.clear();
+  lcd.print("Reset Password?");
+  lcd.setCursor(0, 1);
+  lcd.print("Yes (1), No (0)");
+  delay(1000);
+
+  do {
+    customKey = customKeypad.getKey();
+  } while (!customKey);
+  if (customKey == '1') {
+    lcd.clear();
+    lcd.print("Old Password:");
+    for (int i = 0; i < 8; i++) {
+      do {
+        customKey = customKeypad.getKey();
+      } while (!customKey);
+      if (customKey) {
+
+        // if *, show password
+        if (customKey == '*') {
+          showPass();
+          i = i - 1;
+          continue;
+        }
+
+        // if #, backspace
+
+        if (customKey == '#') {
+          lcd.setCursor(0, 0);
+          lcd.print("Incorrect input");
+          delay(500);
+          lcd.setCursor(0, 0);
+          lcd.print("Old Password:  ");
+          i = i - 1;
+          continue;
+        }
+
+
+        // Enter keypress into array and increment counter
+
+        Data[data_count] = customKey;
+        lcd.setCursor(data_count, 1);
+        lcd.print('*');
+        data_count++;
+      }
+    }
+    if (!strcmp(Data, Master)) {
+      // Password is correct
+      lcd.print("Correct");
+      delay(500);
+      lcd.clear();
+      lcd.print("Enter new");
+      lcd.setCursor(0, 1);
+      lcd.print("Password");
+      delay(1000);
+      lcd.clear();
+      for (int i = 0; i < 8; ++i) {
+
+        do {
+          customKey = customKeypad.getKey();
+        } while (!customKey);
+
+        if (customKey) {
+
+          // if *, show password
+          if (customKey == '*') {
+            showPass();
+            continue;
+          }
+
+          // if #, backspace
+          if (customKey == '#') {
+            if( i != 0 ){
+              Master[i-1]=0;
+            i = i - 1;
+            continue;}
+          }
+          Master[i] = customKey;
+        }
+      }
+      lcd.clear();
+      lcd.print("Password Reset");
+      lcd.setCursor(0, 1);
+      lcd.print("Complete");
+      delay(1000);
+      lcd.clear();
+    } else {
+      lcd.clear();
+      lcd.print("In-correct");
+      lcd.setCursor(0, 1);
+      lcd.print("Password");
+      delay(1000);
+    }
+    return;
+  } else
+    return;
+
+
+  // for (int i = 0; i < Password_Length; i++) {
+  //   // add stuff
+  // }
 }
