@@ -261,6 +261,11 @@ void changepass() {
       if (!strcmp(Data, Master)) {  // matches
         lcd.print("Correct");
         delay(2000);
+
+        // jump for zeroes stuff
+        newmaster:
+          NULL;
+
         lcd.clear();
         lcd.print("Enter New Passwd:");
 
@@ -293,6 +298,25 @@ void changepass() {
 
         delay(1000);
         lcd.clear();
+
+        // check if pass is zeroes
+        if (!strcmp(Master, "00000000")) {
+          lcd.print("Invalid");
+          lcd.setCursor(0, 1);
+          lcd.print("Password");
+          delay(2000);
+          lcd.clear();
+          lcd.print("Password cannot");
+          lcd.setCursor(0, 1);
+          lcd.print("be 00000000");
+          delay(2000);
+          lcd.clear();
+          lcd.print("Try again");
+          delay(2000);
+          goto newmaster;
+        }
+
+
         lcd.print("Password Reset");
         lcd.setCursor(0, 1);
         lcd.print("Successfully");
