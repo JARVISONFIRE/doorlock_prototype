@@ -7,7 +7,7 @@
 // Include Serial library
 #include <SoftwareSerial.h>
 
-SoftwareSerial mySerial(10, 11); // 10 - Rx, 11 - Tx
+SoftwareSerial mySerial(10, 11);  // 10 - Rx, 11 - Tx
 
 // Length of password + 1 for null character
 #define Password_Length 9
@@ -70,7 +70,6 @@ void setup() {
   //Serial
   mySerial.begin(9600);
   Serial.begin(115200);
-
 }
 
 void loop() {
@@ -124,6 +123,10 @@ void loop() {
       digitalWrite(lockOutput, HIGH);
       delay(5000);
       digitalWrite(lockOutput, LOW);
+      digitalWrite(buzzerPin, HIGH);
+      delay(100);
+      digitalWrite(buzzerPin, LOW);
+
     } else {
       // Password is incorrect
       lcd.print("Incorrect");
@@ -142,16 +145,31 @@ void loop() {
         lcd.print("Too many in-");
         lcd.setCursor(0, 1);
         lcd.print("correct attempts.");
-        delay(2000);
+        for (int i = 0; i < 3; i++) {
+          digitalWrite(buzzerPin, HIGH);
+          delay(100);
+          digitalWrite(buzzerPin, LOW);
+          delay(50);
+          digitalWrite(buzzerPin, HIGH);
+          delay(100);
+          digitalWrite(buzzerPin, LOW);
+          delay(100);
+        }
+
+        delay(1000);
         lcd.clear();
         lcd.print("Try again later");
-        delay(7000);
+        // delay(7000);
+        digitalWrite(buzzerPin, HIGH);
+        delay(1500);
+        digitalWrite(buzzerPin, LOW);
+        delay(3500);
         countinc = 0;
       }
     }
 
-    endofloop:
-      NULL;
+endofloop:
+    NULL;
 
     // Clear data and LCD display
     lcd.clear();
@@ -196,7 +214,7 @@ void showPass() {
 }
 
 void backspace() {
-  
+
   if (data_count) {
     data_count--;
     lcd.clear();
@@ -214,7 +232,7 @@ void changepass() {
   lcd.print("Reset Password?");
   lcd.setCursor(0, 1);
   lcd.print("Yes (1), No (0)");
-  delay(1000);
+  //delay(1000);
 
   do {
     getChar();
@@ -279,16 +297,24 @@ void changepass() {
 
           // if *, show password
           if (customKey == '*') {
-            showPass();
+            lcd.setCursor(0, 0);
+            lcd.print("Incorrect input");
+            delay(500);
+            lcd.setCursor(0, 0);
+            lcd.print("Password:      ");
+            i = i - 1;
             continue;
           }
 
           // if #, backspace
           if (customKey == '#') {
-            if( i != 0 ){
-              Master[i-1]=0;
+            lcd.setCursor(0, 0);
+            lcd.print("Incorrect input");
+            delay(500);
+            lcd.setCursor(0, 0);
+            lcd.print("Password:      ");
             i = i - 1;
-            continue;}
+            continue;
           }
           lcd.setCursor(i, 1);
           lcd.print('*');
@@ -317,9 +343,13 @@ void changepass() {
       lcd.clear();
     } else {
       lcd.clear();
-      lcd.print("In-correct");
+      lcd.print("Incorrect");
       lcd.setCursor(0, 1);
       lcd.print("Password");
+      digitalWrite(buzzerPin, HIGH);
+      delay(100);
+      digitalWrite(buzzerPin, LOW);
+
       delay(1000);
     }
     return;
@@ -328,7 +358,7 @@ void changepass() {
 }
 
 void getChar() {
-    btKey = 0;
+  btKey = 0;
   if (mySerial.available()) {
     btKey = mySerial.read();
   }
@@ -337,13 +367,13 @@ void getChar() {
   if (btKey || keyKey) {
     customKey = keyKey ? keyKey : btKey;
   }
-  if(customKey) {
+  if (customKey) {
     digitalWrite(buzzerPin, HIGH);
     delay(100);
     digitalWrite(buzzerPin, LOW);
   }
 }
 
-  // for (int i = 0; i < Password_Length; i++) {
-  //   // add stuff
-  // }
+// for (int i = 0; i < Password_Length; i++) {
+//   // add stuff
+// }
